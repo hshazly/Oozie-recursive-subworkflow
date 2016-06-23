@@ -1,4 +1,4 @@
-# Oozie- recursive subworkflow as loops example
+# Oozie- Recursive subworkflows as loops example
 
 A simple example that illustrates how to use oozie's subworkflows to simulate the execution of a loop/iteration.
 
