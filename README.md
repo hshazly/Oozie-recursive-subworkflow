@@ -8,4 +8,4 @@ The workflow recursively calls itself, each time with a different configuration 
 In Each recursive call it increments a property "counter" which acts as an index to the input file for the current subworkflow, it stops when "check-if-done" node evaluates to false (e.g. input file doesn't exist).
 
 # Credits
-This is not my own idea. The technique and a general outline of the workflow xml can be found <a href=http://www.helmutzechmann.com/2015/04/23/oozie-loops>Here</a>.
+This is not my own idea. The technique and a general outline of the workflow xml can be found <a target='_blank' href=http://www.helmutzechmann.com/2015/04/23/oozie-loops>Here</a>.
