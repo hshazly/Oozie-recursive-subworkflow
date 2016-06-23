@@ -1,0 +1,107 @@
+<workflow-app xmlns="uri:oozie:workflow:0.1" name="recursive-subworkflow">
+	<start to="check-if-done"/>
+
+	<decision name="check-if-done">
+		<switch>
+			<case to="count-lines">${not empty wf:conf(concat("input_file_", counter))}</case>
+			<default to="end"/>
+		</switch>
+	</decision>
+
+	<action name="count-lines">
+		<shell xmlns="uri:oozie:shell-action:0.1">
+			<job-tracker>${jobTracker}</job-tracker>
+			<name-node>${nameNode}</name-node>
+			<exec>${countShellScriptPath}</exec>
+			<argument>${wf:conf(concat("input_file_", counter))}</argument>
+			<file>${countShellScriptPath}</file>
+			<capture-output/>
+		</shell>
+		<ok to="write-data"/>
+		<error to="fail"/>
+	</action>
+
+	<action name="write-data">
+		<shell xmlns="uri:oozie:shell-action:0.1">
+			<job-tracker>${jobTracker}</job-tracker>
+			<name-node>${nameNode}</name-node>
+			<exec>${writeShellScriptPath}</exec>
+			<argument>${counter}</argument>
+			<argument>${wf:actionData('count-lines')['nLines']}</argument>
+			<argument>${outputDir}</argument>
+			<file>${writeShellScriptPath}</file>			
+		</shell>
+		<ok to="loop"/>
+		<error to="fail"/>
+	</action>
+
+	<action name="loop">
+		<sub-workflow>
+			<app-path>${wf:appPath()}/../workflow.xml</app-path>
+			<configuration>
+				<property>
+					<name>counter</name>
+					<value>${counter+1}</value>
+				</property>	
+                <property>
+                    <name>jobTracker</name>
+                    <value>${jobTracker}</value>
+                </property>
+                <property>
+                    <name>nameNode</name>
+                    <value>${nameNode}</value>
+                </property>
+                <property>
+                    <name>queueName</name>
+                    <value>${queueName}</value>
+                </property>				
+                <property>
+                    <name>outputDir</name>
+                    <value>${outputDir}</value>
+                </property>
+                <property>
+                    <name>inputDir</name>
+                    <value>${inputDir}</value>
+                </property>                				
+                <property>
+                    <name>countShellScriptPath</name>
+                    <value>${countShellScriptPath}</value>
+                </property>                				
+                <property>
+                    <name>writeShellScriptPath</name>
+                    <value>${writeShellScriptPath}</value>
+                </property> 
+                <!--
+                <property>
+					<name>${concat("input_file_", counter+1)}</name>
+					<value>${wf:conf(concat("input_file_", counter+1))}</value>
+                </property>
+                -->               				
+                <property>
+                    <name>input_file_2</name>
+                    <value>hdfs://localhost:9000/user/hatem/subwf/input/myinput2.txt</value>
+                </property>                				
+                <property>
+                    <name>input_file_3</name>
+                    <value>hdfs://localhost:9000/user/hatem/subwf/input/myinput3.txt</value>
+                </property>
+                
+			</configuration>
+		</sub-workflow>
+		<ok to="end"/>
+		<error to="fail"/>
+	</action>
+
+	<kill name="fail">
+		<message>Error Message[${wf:errorMessage(wf:lastErrorNode())}]</message>
+	</kill>
+<!--
+	<parameters>
+		<property>
+			<name>counter</name>
+		</property>
+	</parameters>
+-->
+	<end name="end"/>
+
+</workflow-app>
